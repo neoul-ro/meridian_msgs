@@ -31,6 +31,8 @@ ROS 2 Humble interface package for Meridian runtime dataflow contracts.
 - `RGBDFrame.rgb` uses `rgb8`; `depth_m` uses `32FC1` in meters.
 - `SegmentImage.labels` uses `mono8`. Value `0` is background and values
   `1..255` are frame-local segment IDs.
+- Capture `timestamp` is unique per frame within one sensor stream.
+- `(timestamp, segment_id)` identifies one frame-local object observation.
 - `InstanceEmbeddingSet.embeddings` is row-major `[N, D]`, where
   `N == segment_ids.size()` and `D == embedding_dim`.
 - For an `EmbeddedTracklet`, `source_segments`,
