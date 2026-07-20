@@ -44,8 +44,9 @@ ROS 2 Humble interface package for Meridian runtime dataflow contracts.
   which they were computed.
 - A `MATCH` decision requires `has_matched_object_id == true`; other outcomes
   require it to be false.
-- A `CREATE` mutation requires `has_target_object_id == false`; an `UPDATE`
-  mutation requires it to be true.
+- A `CREATE` mutation uses `target_object_id == 0`. `UPDATE` and `DELETE`
+  require an existing non-zero `target_object_id`.
+- `ObjectMutation.proposed_state` is ignored for `DELETE`.
 - Point clouds and geometry fields are expressed in the world frame. Each
   `PointCloud2.header.frame_id` must agree with the active graph world frame.
 - Runtime messages contain no benchmark-only ground-truth fields.
