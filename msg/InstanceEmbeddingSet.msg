@@ -2,5 +2,5 @@
 builtin_interfaces/Time timestamp  # Source camera frame capture time
 string embedding_model_id         # Model, weights, and preprocessing configuration ID
 uint8[] segment_ids                # [N]; segment_ids[n] owns embedding row n
-uint32 embedding_dim               # Embedding dimension D
+uint16 embedding_dim               # Embedding dimension D
 float32[] embeddings               # Row-major flattened matrix [N, D]

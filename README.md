@@ -1,13 +1,17 @@
 # meridian_msgs
 
 ROS 2 Humble interface package for Meridian runtime dataflow contracts.
+Sensor input, segmentation, and pose use standard types (`sensor_msgs/Image`,
+`sensor_msgs/CameraInfo`, `geometry_msgs/PoseWithCovarianceStamped`); this
+package defines only the Meridian-specific messages.
 
 ## Type mapping
 
 | Runtime type | ROS 2 representation |
 | --- | --- |
 | `cv::Mat` image | `sensor_msgs/Image` |
-| `Eigen::Isometry3d` | `geometry_msgs/PoseWithCovariance` |
+| camera intrinsics | `sensor_msgs/CameraInfo` |
+| `Eigen::Isometry3d` | `geometry_msgs/PoseWithCovarianceStamped` |
 | `Eigen::Vector3f` point | `geometry_msgs/Point` |
 | `Eigen::Vector3f` extent | `geometry_msgs/Vector3` |
 | `Eigen::Matrix<float, 3, Dynamic>` | `sensor_msgs/PointCloud2` |
@@ -17,31 +21,30 @@ ROS 2 Humble interface package for Meridian runtime dataflow contracts.
 
 ## Message groups
 
-- Sensor and perception: `RGBDFrame`, `SegmentImage`, `PoseEstimate`,
-  `InstanceEmbeddingSet`, `Instance3D`, `Instance3DSet`
-- Frontend tracking: `SegmentRef`, `TrackletGeometry`, `TrackletSemantics`,
-  `EmbeddedTracklet`, `EmbeddedTrackletSet`
+- Perception: `InstanceEmbeddingSet`, `Instance3DSet`
+- Frontend tracking: `SegmentRef`, `Tracklet`, `TrackletSet`
 - Data association: `AssociationDecision`, `AssociationDecisionSet`
 - Persistent state: `ObjectGeometryState`, `ObjectSemanticState`, `ObjectState`
-- Graph update: `ObjectMutation`, `ObjectMutationSet`, `ObjectNode`,
+- Graph update: `ObjectMutation`, `ObjectUpdateSet`, `ObjectNode`,
   `LocalObjectGraphSnapshot`, `ObjectChange`, `GraphUpdateEvent`
 
 ## Contract invariants
 
-- `RGBDFrame.rgb` uses `rgb8`; `depth_m` uses `32FC1` in meters.
-- `SegmentImage.labels` uses `mono8`. Value `0` is background and values
-  `1..255` are frame-local segment IDs.
-- Capture `timestamp` is unique per frame within one sensor stream.
-- `(timestamp, segment_id)` identifies one frame-local object observation.
+- Capture time is unique per frame within one sensor stream and is carried in
+  `header.stamp` for header-bearing messages.
+- `Instance3DSet.segment_ids` and `instance_points` are parallel arrays of the
+  same size; `segment_ids[k]` labels `instance_points[k]`.
 - `InstanceEmbeddingSet.embeddings` is row-major `[N, D]`, where
   `N == segment_ids.size()` and `D == embedding_dim`.
-- For an `EmbeddedTracklet`, `source_segments`,
-  `geometry.point_clouds_world_m`, and the semantic embedding rows describe
-  the same ordered observations.
-- `EmbeddedTrackletSet` is the complete snapshot for one rolling window, not a
-  delta. Repeated `SegmentRef` evidence must be merged idempotently.
-- `AssociationDecisionSet` and `ObjectMutationSet` carry the graph version on
-  which they were computed.
+- `TrackletSet` is the complete snapshot of live tracklets at one frame, not a
+  delta; consumers must not merge across snapshots.
+- `tracklet_id` is persistent across snapshots within a session but is not a
+  graph identity; stable identity is `object_id` only.
+- Integer widths: `object_id`/`tracklet_id`/`graph_version` are `uint32`,
+  `embedding_dim` is `uint16`, `segment_id` is `uint8`.
+- `AssociationDecisionSet` and `ObjectUpdateSet` reference the source
+  `TrackletSet` frame via `header.stamp` and carry the graph version on which
+  they were computed.
 - A `MATCH` decision requires `has_matched_object_id == true`; other outcomes
   require it to be false.
 - A `CREATE` mutation uses `target_object_id == 0`. `UPDATE` and `DELETE`
