@@ -3,7 +3,7 @@ uint8 MATCH=0       # Associate with matched_object_id
 uint8 NEW_OBJECT=1  # Request a new persistent object
 uint8 DEFER=2       # Produce no graph mutation for this tracklet
 
-uint64 tracklet_id              # EmbeddedTracklet ID within the source window
+uint64 tracklet_id              # Tracklet ID within the source TrackletSet
 uint8 outcome                   # MATCH, NEW_OBJECT, or DEFER
 bool has_matched_object_id      # Whether matched_object_id is valid
 uint64 matched_object_id        # Existing stable object_id selected by DA

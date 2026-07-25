@@ -6,12 +6,11 @@ find_package(builtin_interfaces REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 set(msg_files
   "msg/AssociationDecision.msg"
   "msg/AssociationDecisionSet.msg"
-  "msg/EmbeddedTracklet.msg"
-  "msg/EmbeddedTrackletSet.msg"
   "msg/GraphUpdateEvent.msg"
   "msg/Instance3D.msg"
   "msg/Instance3DSet.msg"
@@ -25,8 +24,8 @@ set(msg_files
   "msg/ObjectSemanticState.msg"
   "msg/ObjectState.msg"
   "msg/SegmentRef.msg"
-  "msg/TrackletGeometry.msg"
-  "msg/TrackletSemantics.msg"
+  "msg/Tracklet.msg"
+  "msg/TrackletSet.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
@@ -35,6 +34,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
     builtin_interfaces
     geometry_msgs
     sensor_msgs
+    std_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)
