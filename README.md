@@ -2,8 +2,21 @@
 
 ROS 2 Humble interface package for Meridian runtime dataflow contracts.
 Sensor input, segmentation, and pose use standard types (`sensor_msgs/Image`,
-`sensor_msgs/CameraInfo`, `geometry_msgs/PoseWithCovarianceStamped`); this
-package defines only the Meridian-specific messages.
+`sensor_msgs/CameraInfo`, `geometry_msgs/PoseStamped`); this package defines
+only the Meridian-specific messages.
+
+The robot pose is published on two topics, and which one a consumer subscribes
+to decides the type it must expect:
+
+| Topic | Type | |
+| --- | --- | --- |
+| `/pose` | `geometry_msgs/PoseStamped` | the contract; `map` frame, `base_link` pose |
+| `/pose_cov` | `geometry_msgs/PoseWithCovarianceStamped` | same pose, for consumers that need covariance |
+
+Both carry the same stamp and the same pose. Subscribing to `/pose` with
+`PoseWithCovarianceStamped` connects to nothing: ROS 2 matches publisher and
+subscriber by type as well as name, so a mismatch is silent -- no error, no
+data.
 
 ## Type mapping
 
