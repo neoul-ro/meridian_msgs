@@ -46,4 +46,9 @@ uint8 reject_reason              # REJECT_* value
 uint32 n_candidates              # Candidates that passed the gate, before the per-query cap
 meridian_msgs/CandidateScoreDev[] candidates          # Top 8 by combined, descending; best_object_id / runner_up_object_id are always kept in the list
 meridian_msgs/DuplicateSuspectDev[] duplicate_suspects  # 0 or 1 record
-uint32 latency_us                # Gate -> associate -> commit, microseconds
+# 0 or 1 record: the direct node-node comparison of the duplicate_suspects pair
+# above, run after the commit. Present whenever a suspect was recorded, whether
+# or not merging is enabled (with it off, applied is false and the graph is
+# unchanged). Empty when this commit recorded no suspect.
+meridian_msgs/MergeVerificationDev[] merge_verifications
+uint32 latency_us                # Gate -> associate -> commit (and the merge verification), microseconds

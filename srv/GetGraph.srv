@@ -24,7 +24,13 @@ string embedding_model_id  # Store embedding model
 uint16 embedding_dim       # Store embedding dimension
 bool is_full               # true: graph_blob is the whole graph (this page of it); false: changed nodes only
 uint8[] graph_blob         # Spark-DSG binary graph (see above); empty when nothing changed or version_moved
-uint32[] removed_object_ids # Nodes deleted since client_version (V1: always empty)
+# Ids that left the graph since client_version, with the same meaning and the
+# same non-overlap as in GraphUpdateEventDev; the consumer deletes both lists
+# from its replica. Empty for a full response (the blob is the whole graph).
+# A diff answered in several pages repeats both lists on every page.
+uint32[] removed_object_ids # Nodes deleted with no successor (still always empty)
+uint32[] merged_from        # Nodes deleted because they were merged into another node
+uint32[] merged_into        # Parallel to merged_from: the node that absorbed merged_from[i]
 uint64 next_cursor         # != 0: more pages; call again with the same client_* and this cursor
 bool version_moved         # A commit happened between pages: discard the pages, restart with cursor = 0
 string blob_format         # Encoding of graph_blob, "spark_dsg_binary"

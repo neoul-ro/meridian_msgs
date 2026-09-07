@@ -29,6 +29,7 @@ set(msg_files
   "msg/GraphUpdateEventDev.msg"
   "msg/CandidateScoreDev.msg"
   "msg/DuplicateSuspectDev.msg"
+  "msg/MergeVerificationDev.msg"
   "msg/AssociationDecisionDev.msg"
   "msg/AssociationDecisionSetDev.msg"
 )
