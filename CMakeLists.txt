@@ -27,6 +27,10 @@ set(msg_files
   "msg/TrackletDev.msg"
   "msg/TrackletSet.msg"
   "msg/GraphUpdateEventDev.msg"
+  "msg/CandidateScoreDev.msg"
+  "msg/DuplicateSuspectDev.msg"
+  "msg/AssociationDecisionDev.msg"
+  "msg/AssociationDecisionSetDev.msg"
 )
 
 set(srv_files
