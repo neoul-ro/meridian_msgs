@@ -1,0 +1,9 @@
+# Writes the whole graph to a Spark-DSG file (binary; ".json" extension = JSON form)
+# on the graphcore_node host. Synchronous on the node's single thread; the
+# /tracklet queue absorbs commits that arrive meanwhile.
+string path                # Destination file path; an empty string fails
+---
+bool success               # true when the file was written
+string message             # meridian::IoStatus name (kOk, kNotFound, kPermissionDenied, ...)
+uint64 graph_epoch
+uint64 graph_version       # Version of the saved state

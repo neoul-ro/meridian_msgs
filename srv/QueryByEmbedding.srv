@@ -1,0 +1,12 @@
+# Nearest object nodes to a query embedding by cosine similarity against each
+# node's accumulated embedding (nodes without an embedding are skipped).
+# Text-to-embedding is the caller's job; the query must use the store's model
+# and dimension (a wrong length or a zero vector yields an empty result).
+float32[] embedding        # Query vector [embedding_dim]; normalised by the server
+uint32 top_k               # Results to keep; 0 = all above min_cosine
+float32 min_cosine         # Drop results with cosine below this (e.g. -1.0 = keep all)
+---
+uint32[] object_ids        # Ranked by cosine descending (smaller id first on ties)
+float32[] scores           # cosine per object_ids entry
+geometry_msgs/Point[] centers # Node centre per object_ids entry (world frame)
+uint64 graph_version       # Version the ranking was computed at

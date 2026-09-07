@@ -24,11 +24,20 @@ set(msg_files
   "msg/ObjectState.msg"
   "msg/SegmentRef.msg"
   "msg/Tracklet.msg"
+  "msg/TrackletDev.msg"
   "msg/TrackletSet.msg"
+  "msg/GraphUpdateEventDev.msg"
+)
+
+set(srv_files
+  "srv/GetGraph.srv"
+  "srv/SaveGraph.srv"
+  "srv/QueryByEmbedding.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
+  ${srv_files}
   DEPENDENCIES
     builtin_interfaces
     geometry_msgs

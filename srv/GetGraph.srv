@@ -1,0 +1,30 @@
+# Resynchronisation of a consumer replica with the graphcore_node store.
+#
+# Decision (in this order): client_epoch != graph_epoch, client_version == 0,
+# client_version > graph_version, or client_version below the retained change log
+# -> is_full = true and graph_blob is the whole graph. Otherwise is_full = false and
+# graph_blob holds only the nodes changed after client_version (exclusive) up to
+# graph_version (inclusive), each once in its latest state; an empty blob then
+# means "already current". Either blob is a Spark-DSG binary DynamicSceneGraph
+# applied with mergeGraph(update_dynamic_attributes = true,
+# update_archived_attributes = true). For a full response clear the replica only
+# when the request's cursor is 0: a paged full response (max_nodes != 0) reports
+# is_full = true on every page, and the later pages of the same response are
+# merged into the replica the first page started.
+uint64 client_epoch        # graph_epoch the replica last applied; 0 when joining
+uint64 client_version      # graph_version the replica has applied (exclusive); 0 when joining
+uint32 max_nodes           # Nodes per response; 0 = server parameter get_graph_max_nodes (0 = unlimited)
+uint64 cursor              # 0 for the first page, else next_cursor of the previous response
+---
+uint64 graph_epoch
+uint64 graph_version       # Last commit this response reflects (inclusive); the replica adopts it
+uint64 state_hash          # Value at graph_version (same definition as GraphUpdateEventDev.state_hash)
+float32 voxel_size         # Store grid (metres)
+string embedding_model_id  # Store embedding model
+uint16 embedding_dim       # Store embedding dimension
+bool is_full               # true: graph_blob is the whole graph (this page of it); false: changed nodes only
+uint8[] graph_blob         # Spark-DSG binary graph (see above); empty when nothing changed or version_moved
+uint32[] removed_object_ids # Nodes deleted since client_version (V1: always empty)
+uint64 next_cursor         # != 0: more pages; call again with the same client_* and this cursor
+bool version_moved         # A commit happened between pages: discard the pages, restart with cursor = 0
+string blob_format         # Encoding of graph_blob, "spark_dsg_binary"
