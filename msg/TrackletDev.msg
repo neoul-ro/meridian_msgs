@@ -19,3 +19,15 @@ uint32 n_observations                      # Frames in the episode
 uint32 n_obs_embedded                      # Frames that contributed to tracklet_semantics (semantic weight)
 uint16 embedding_dim                       # Length of tracklet_semantics when non-empty
 string embedding_model_id                  # Embedding model identifier (e.g. CLIP ViT-B/32)
+
+# Object identity decided upstream (optional; added 2026-09-30). Read only by a
+# graphcore_node running with `association_source: external`, which then skips its
+# own association and follows these ids; `internal` (the default) ignores both
+# fields, so a publisher that leaves them unset behaves exactly as before.
+# In that mode one message is one update of one upstream object (not an episode):
+# tracklet_geometry is the object's complete current voxel set and replaces the
+# node's geometry. tracklet_id stays unique per message (it is the commit key).
+uint32 external_object_id                  # Upstream DA's stable object id; 0 = none
+uint32[] merged_external_object_ids        # Upstream ids the DA merged into external_object_id
+                                           # (at or before this update); their nodes are merged
+                                           # into its node before the update is applied

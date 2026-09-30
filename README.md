@@ -66,6 +66,10 @@ data.
 - Point clouds and geometry fields are expressed in the world frame. Each
   `PointCloud2.header.frame_id` must agree with the active graph world frame.
 - Runtime messages contain no benchmark-only ground-truth fields.
+- `TrackletDev.external_object_id` / `merged_external_object_ids` (optional,
+  2026-09-30) carry an upstream DA's object identity and its merges; 0 / empty
+  means none. Only a graphcore_node with `association_source: external` reads
+  them; `tracklet_id` stays unique per message either way.
 
 The persistent geometry update, semantic aggregation, score calibration, and
 association policies remain algorithm-level decisions outside this interface
