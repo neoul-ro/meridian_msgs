@@ -18,51 +18,34 @@ Both carry the same stamp and the same pose. Subscribing to `/pose` with
 subscriber by type as well as name, so a mismatch is silent -- no error, no
 data.
 
-## Type mapping
+## Messages
 
-| Runtime type | ROS 2 representation |
+| Type | Topic | Published by | Read by |
+| --- | --- | --- | --- |
+| `TrackletDev` | `/tracklet` | `meridian` pipeline node (one per DA object update) | `graphcore_node` |
+| `GraphUpdateEventDev` | `/graph_update_event` | `graphcore_node` (one per commit, heartbeats) | graph replicas, `gt_evaluator` |
+| `AssociationDecisionSetDev` (+ `AssociationDecisionDev`, `CandidateScoreDev`, `DuplicateSuspectDev`, `MergeVerificationDev`) | `/association_decision_set` | `graphcore_node` with `debug_decisions` | DA benchmarking |
+| `FrameStatus` | `/meridian/frame_status` | `meridian` pipeline node (one per input frame) | `dataset_publisher` (lockstep), `gt_evaluator` |
+
+| Service | Server |
 | --- | --- |
-| `cv::Mat` image | `sensor_msgs/Image` |
-| camera intrinsics | `sensor_msgs/CameraInfo` |
-| `Eigen::Isometry3d` | `geometry_msgs/PoseWithCovarianceStamped` |
-| `Eigen::Vector3f` point | `geometry_msgs/Point` |
-| `Eigen::Vector3f` extent | `geometry_msgs/Vector3` |
-| `Eigen::Matrix<float, 3, Dynamic>` | `sensor_msgs/PointCloud2` |
-| `torch::Tensor [N, D]` | row-major `float32[]` with `embedding_dim` |
-| `std::optional<T>` | `bool has_*` followed by the value field |
-| `std::unordered_map<object_id, ObjectNode>` | `ObjectNode[]` with unique `object_id` |
+| `GetGraph` (`/get_graph`), `SaveGraph` (`/save_graph`), `QueryByEmbedding` (`/query_by_embedding`) | `graphcore_node` |
 
-## Message groups
-
-- Perception: `InstanceEmbeddingSet`, `Instance3DSet`
-- Frontend tracking: `SegmentRef`, `Tracklet`, `TrackletSet`
-- Data association: `AssociationDecision`, `AssociationDecisionSet`
-- Persistent state: `ObjectGeometryState`, `ObjectSemanticState`, `ObjectState`
-- Graph update: `ObjectMutation`, `ObjectUpdateSet`, `ObjectNode`,
-  `LocalObjectGraphSnapshot`, `ObjectChange`, `GraphUpdateEvent`
+The frontend's keyframe output (`TrackletSet`) lives in `meridian_frontend_msgs`, not here.
+The v0.0.2 message set (`Tracklet`, `TrackletSet`, `SegmentRef`, `Instance3DSet`,
+`InstanceEmbeddingSet`, `AssociationDecision(Set)`, `Object*`, `LocalObjectGraphSnapshot`,
+`GraphUpdateEvent`) was removed on 2026-10-01: after the Python graphcore scaffold was
+deleted nothing in the workspace published or subscribed to any of them. They are in the
+git history if needed.
 
 ## Contract invariants
 
 - Capture time is unique per frame within one sensor stream and is carried in
   `header.stamp` for header-bearing messages.
-- `Instance3DSet.segment_ids` and `instance_points` are parallel arrays of the
-  same size; `segment_ids[k]` labels `instance_points[k]`.
-- `InstanceEmbeddingSet.embeddings` is row-major `[N, D]`, where
-  `N == segment_ids.size()` and `D == embedding_dim`.
-- `TrackletSet` is the complete snapshot of live tracklets at one frame, not a
-  delta; consumers must not merge across snapshots.
-- `tracklet_id` is persistent across snapshots within a session but is not a
-  graph identity; stable identity is `object_id` only.
-- Integer widths: `object_id`/`tracklet_id`/`graph_version` are `uint32`,
-  `embedding_dim` is `uint16`, `segment_id` is `uint8`.
-- `AssociationDecisionSet` and `ObjectUpdateSet` reference the source
-  `TrackletSet` frame via `header.stamp` and carry the graph version on which
-  they were computed.
-- A `MATCH` decision requires `has_matched_object_id == true`; other outcomes
-  require it to be false.
-- A `CREATE` mutation uses `target_object_id == 0`. `UPDATE` and `DELETE`
-  require an existing non-zero `target_object_id`.
-- `ObjectMutation.proposed_state` is ignored for `DELETE`.
+- `tracklet_id` is unique per `TrackletDev` message (it is graphcore's commit key) and is
+  not a graph identity; stable identity is `object_id` only.
+- Integer widths: `object_id`/`tracklet_id` are `uint32`, `graph_version` is `uint64`,
+  `embedding_dim` is `uint16`.
 - Point clouds and geometry fields are expressed in the world frame. Each
   `PointCloud2.header.frame_id` must agree with the active graph world frame.
 - Runtime messages contain no benchmark-only ground-truth fields.

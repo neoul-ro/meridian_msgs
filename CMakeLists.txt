@@ -9,29 +9,14 @@ find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 set(msg_files
-  "msg/AssociationDecision.msg"
-  "msg/AssociationDecisionSet.msg"
-  "msg/GraphUpdateEvent.msg"
-  "msg/Instance3DSet.msg"
-  "msg/InstanceEmbeddingSet.msg"
-  "msg/LocalObjectGraphSnapshot.msg"
-  "msg/ObjectChange.msg"
-  "msg/ObjectGeometryState.msg"
-  "msg/ObjectMutation.msg"
-  "msg/ObjectUpdateSet.msg"
-  "msg/ObjectNode.msg"
-  "msg/ObjectSemanticState.msg"
-  "msg/ObjectState.msg"
-  "msg/SegmentRef.msg"
-  "msg/Tracklet.msg"
   "msg/TrackletDev.msg"
-  "msg/TrackletSet.msg"
   "msg/GraphUpdateEventDev.msg"
   "msg/CandidateScoreDev.msg"
   "msg/DuplicateSuspectDev.msg"
   "msg/MergeVerificationDev.msg"
   "msg/AssociationDecisionDev.msg"
   "msg/AssociationDecisionSetDev.msg"
+  "msg/FrameStatus.msg"
 )
 
 set(srv_files
